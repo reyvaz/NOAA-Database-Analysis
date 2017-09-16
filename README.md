@@ -33,12 +33,6 @@ script with the database downloaded from the link above.
 <br>
 
 <center>
-[![alt text][image]][hyperlink]
-
-  [hyperlink]: https://reyvaz.github.io/NOAA-Database-Analysis/us_weather.html
-  [image]: us_weather_files/figure-html/Damages4-1.png (tooltip)
-
-
-<img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" style="width:100;"/>
+<img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" style="width:70%;"/>
 </center>
 <br>
