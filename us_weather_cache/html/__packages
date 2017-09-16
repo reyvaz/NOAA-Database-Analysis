@@ -1,9 +1,0 @@
-base
-dplyr
-ggplot2
-knitr
-pander
-scales
-reshape2
-kableExtra
-gridExtra
