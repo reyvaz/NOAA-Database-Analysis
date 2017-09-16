@@ -1,16 +1,8 @@
-
-<style>
-  body {
-  text-align: justify}
-</style>
-
-
 [**CLICK HERE**](https://reyvaz.github.io/NLP-Corpora-Analysis/exploration_report.html)
 to see html report
 
-
 ## Exploring the US NOAA Storm Database
-
+<div style="text-align: justify">
 This repository contains the R scripts to explore the U.S. National Oceanic and 
 Atmospheric Administration's (NOAA) storm database. The database tracks 
 characteristics of major storms and weather events in the United States, 
@@ -39,7 +31,7 @@ script with the database downloaded from the link above.
 
 [GitHub Pages Link](https://reyvaz.github.io/NLP-Corpora-Analysis/)  
 <br>
-
+</div>
 <center>
 <img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" 
 style="width: 70%;"/>
