@@ -33,6 +33,6 @@ script with the database downloaded from the link above.
 <br>
 
 <center>
-[<img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" style="width: 60%;"/>]
+<img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" style="width:100;"/>
 </center>
 <br>
