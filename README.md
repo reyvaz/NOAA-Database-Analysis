@@ -1,14 +1,14 @@
 [**CLICK HERE**](https://reyvaz.github.io/NOAA-Database-Analysis/us_weather.html)
-to see html report
+to see full report in html
 
 ## Exploring the US NOAA Storm Database
-<div style="text-align: justify">
+
 This repository contains the R scripts to explore the U.S. National Oceanic and 
 Atmospheric Administration's (NOAA) storm database. The database tracks 
 characteristics of major storms and weather events in the United States, 
 including date and location, estimates of fatalities, injuries, and property 
 damage. The records start in 1950 and end in November 2011. It contains 
-nearly 1 million records. 
+nearly 1 million records.   
 
 The data is available 
 [here](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2). 
@@ -31,8 +31,8 @@ script with the database downloaded from the link above.
 
 [GitHub Pages Link](https://reyvaz.github.io/NOAA-Database-Analysis/)  
 <br>
-</div>
+
 <center>
-[<img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" style="width: 60%;"/>](https://reyvaz.github.io/NOAA-Database-Analysis/us_weather.html)
+[<img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" style="width: 60%;"/>]
 </center>
 <br>
