@@ -33,7 +33,10 @@ script with the database downloaded from the link above.
 <br>
 
 <center>
-[![Foo](us_weather_files/figure-html/Damages4-1.png)](https://reyvaz.github.io/NOAA-Database-Analysis/us_weather.html)
+[![alt text][image]][hyperlink]
+
+  [hyperlink]: https://reyvaz.github.io/NOAA-Database-Analysis/us_weather.html
+  [image]: us_weather_files/figure-html/Damages4-1.png (tooltip)
 
 
 <img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" style="width:100;"/>
