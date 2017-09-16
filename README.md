@@ -18,7 +18,7 @@ The analysis addresses two questions:
 
 1. In the U.S., what weather events have been the most harmful to population 
 life and health?  
-2. In the U.S., what weather events have the most economically devastating?  
+2. In the U.S., what weather events have been the most economically devastating?  
 
 Tornadoes are found to have caused the most fatalities and injuries in the 
 period reported. The second most hazardous to human life and health, as well as
@@ -33,6 +33,8 @@ script with the database downloaded from the link above.
 <br>
 
 <center>
+[![alt text](us_weather_files/figure-html/Damages4-1.png "see the html report")](https://reyvaz.github.io/NOAA-Database-Analysis/us_weather.html)
+
 <img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" style="width:70%;"/>
 </center>
 <br>
