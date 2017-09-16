@@ -1,0 +1,254 @@
+---
+title: "Most Hazardous Weather Events in the U.S."
+author: "Reynaldo"
+date: "9/07/2017"
+output: html_document
+---
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+  .col3 {
+    columns: 3 100px;
+    -webkit-columns: 3 100px;
+    -moz-columns: 3 100px;
+  }
+  body {
+  text-align: justify}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, cache = T, warning=F, message=F, 
+                      fig.align = 'center')
+```
+
+## Synopsis  
+The following analysis addresses two questions:  
+
+1. In the U.S., what weather events have been the most harmful to population life and 
+health?  
+2. In the U.S., what weather events have been the most economically devastating?  
+
+This analysis uses data from the U.S. National Oceanic and Atmospheric 
+Administration's (NOAA) storm database. The database tracks characteristics of 
+major storms and weather events in the United States, including date and 
+location, estimates of fatalities, injuries, and property damage. The records 
+start in 1950 and end in November 2011.  
+
+Tornadoes are found to have caused the most fatalities and injuries in the 
+period reported. The second most hazardous to human life and health, as well as 
+the most economically devastating, are floods. 
+
+## Data Processing
+
+Data was downloaded from 
+[here](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2 "download") 
+on September 7, 2017. The full raw dataset was loaded into R and processed by 
+discarding variables not relevant to this analysis. Other transformations and 
+manipulations are described throughout the document. 
+
+1. Load required packages
+```{r packages, warning=FALSE, message=FALSE}
+require(dplyr); require(ggplot2);require(knitr); require(pander)
+require(kableExtra);require(gridExtra);require(reshape2)
+```
+2. Load full dataset
+```{r load, cache = T}
+fulldata <- read.csv("repdata-data-StormData.csv.bz2", stringsAsFactors = FALSE)
+```
+3. Inspect variable names to discard those non-relevant 
+```{r names}
+names(fulldata)
+```
+4. Select needed variables and analyze their structure
+```{r trim}
+data <- select(fulldata, EVTYPE, FATALITIES, INJURIES, PROPDMG, PROPDMGEXP, 
+               CROPDMG, CROPDMGEXP)
+str(data)
+```
+5. Preprocess event type names  
+
+The original data set has `r length(unique(fulldata$EVTYPE))` *unique* types of 
+events. Many of these seem to belong to a same category of event as others, as 
+can be seen in the example below for hurricanes.
+```{r example}
+exIdx <- grep("HURR", data$EVTYPE, perl = TRUE)
+unique(data$EVTYPE[exIdx])
+```
+
+The following preprocessing partially solves the issue above by correcting some 
+misspellings, substituting plurals and synonyms, removing excessive space, 
+symbols, numbers, redundancies, and specificities. The purpose is to rename 
+original *event types* that unambiguously belong to the same type. 
+
+```{r grepPrep}
+remove <- grep("summary", tolower(data$EVTYPE), perl=TRUE)
+data   <- data[-remove,]
+events <- tolower(data$EVTYPE)
+events <- gsub("[[:alnum:]]*[.]*[0-9]+", "", events, perl=TRUE, useBytes = T)
+events <- gsub("[^[:alpha:][:space:]]|mph", " ", events, perl=T, useBytes = T)
+events <- gsub("(?<=hurricane)[ a-z]*", "", events, perl=TRUE, useBytes = T)
+events <- gsub("(?<=tropical storm)[ a-z]*", "", events, perl=TRUE, useBytes = T)
+events <- gsub("thunde[a-z]*", "thunderstorm", events, perl=TRUE, useBytes = T)
+events <- gsub("tstm", "thunderstorm", events, perl=TRUE, useBytes = T)
+events <- gsub("floo[a-z]*", "floods", events, perl=TRUE, useBytes = T)
+events <- gsub("precipit[a-z]*|rain[a-z]*", "rain", events, perl=TRUE, useBytes = T)
+events <- gsub("winds", "wind", events, perl=TRUE, useBytes = T)
+events <- gsub("torn[a-z]+", "tornado", events, perl=TRUE, useBytes = T)
+events <- gsub("thunde[a-z]*", "thunderstorm", events, perl=TRUE, useBytes = T)
+pattrn <- "extr[a-z]*|record|severe|exce[a-z]*|unusu[a-z]*|heavy|major|abno[a-z]*|haza[a-z]*"
+events <- gsub(pattrn, "excessive", events, perl=TRUE, useBytes = T)
+pattrn <- "astron[a-z]*|weather|temperat[a-z]*|damag[a-z]*"
+events <- gsub(pattrn, "", events, perl=TRUE, useBytes = T)
+events <- gsub("(?<=[\\s])\\s*|^\\s+|\\s+$", "", events, perl=TRUE, useBytes = T)
+reCap  <- function(text) {
+    s  <- strsplit(text, " ")[[1]]
+    paste(toupper(substring(s, 1,1)), substring(s, 2), sep="", collapse=" ")
+}
+events <- sapply(events, reCap, USE.NAMES = FALSE)
+data$EVTYPE <- events
+```
+
+The event type preprocessing above reduced the number of *unique* event 
+categories from `r length(unique(fulldata$EVTYPE))` to `r length(unique(events))`. 
+Although this recategorization is not comprehensive, it should suffice for the 
+rest of the analysis. Skipping this recategorization has only limited 
+quantitative effects on the results, whereas the qualitative effects are 
+negligible, at least for the most devastating types of events. 
+
+6. Decode PROPDMGEXP and CROPDMGEXP, with their corresponding values. These two 
+variables contain either: a number, or a letter representing the exponent that 
+multiplies their corresponding numeric values in the PROPDM and CROPDMG columns
+```{r exps}
+data$PROPDMGEXP <- tolower(data$PROPDMGEXP)
+data$CROPDMGEXP <- tolower(data$CROPDMGEXP)
+xfactors <- c("h", "k", "m", "b")
+xvalues  <- c("2", "3", "6", "9")
+for (i in 1:4){
+        data$PROPDMGEXP <- gsub(xfactors[i], xvalues[i], data$PROPDMGEXP, fixed = TRUE)
+        data$CROPDMGEXP <- gsub(xfactors[i], xvalues[i], data$CROPDMGEXP, fixed = TRUE)
+}
+```
+
+7. Transform the PROPDMG and CROPDMG to contain the dollar amounts of their 
+respective damages. Calculate a new variable "TotalDamage", by adding the two 
+types of damage amounts. 
+```{r damages, warning=FALSE, message=FALSE}
+data$PROPDMGEXP <- 10^as.numeric(as.character(data$PROPDMGEXP))
+data$CROPDMGEXP <- 10^as.numeric(as.character(data$CROPDMGEXP))
+data$PROPDMG    <- data$PROPDMG*data$PROPDMGEXP
+data$CROPDMG    <- data$CROPDMG*data$CROPDMGEXP
+TotalDamage     <- rowSums(cbind(data$PROPDMG, data$CROPDMG), na.rm = TRUE)
+```
+
+8. Tidy up the data by keeping only variables needed and fixing variable names
+```{r tidy}
+data <- select(data, EVTYPE, FATALITIES, INJURIES, PROPDMG, CROPDMG)
+names(data) <- c("EventType", "Fatalities", "Injuries", "Property", "Crops")
+data <- cbind(data, TotalDamage)
+```
+
+9. Calculate the sum of total fatalities and injuries by type of event
+```{r sums}
+sums <- aggregate(cbind(Fatalities, Injuries) ~ EventType, data = data, sum)
+```
+   
+10. Select and rank the 10 weather events with most deaths and most injuries, 
+respectively
+```{r tables}
+tops <- 10
+TF   <- head(select(arrange(sums, desc(Fatalities)), EventType, Fatalities), tops)
+Rank <- c(1:tops)
+TF2  <- cbind(Rank, TF)
+TF2[,3] <- format(TF2[,3], decimal.mark=".", big.mark=",", scientific=F, digits = 0)
+TI   <- head(select(arrange(sums, desc(Injuries)), EventType, Injuries), tops)
+TI2  <- cbind(Rank, TI)
+TI2[,3] <- format(TI2[,3], decimal.mark=".", big.mark=",", scientific=F, digits = 0)
+deathsTable <- kable(TF2, format = "html", caption = "Table 1: Deadliest Weather Events",
+                align=c("c", "l", "r"), col.names = c("Rank", "Type of Event", "Fatalities")) %>%
+    kable_styling(bootstrap_options = c("striped","condensed", "bordered"), full_width = F) %>%
+    add_footnote(c("period 1950 - 2011"), notation = "alphabet")
+injuriesTable <- kable(TI2, format = "html", caption = "Table 2: Events with Most Injuries",
+                  align=c("c", "l", "r"), col.names = c("Rank", "Type of Event", "Injuries")) %>%
+    kable_styling(bootstrap_options = c("striped", "condensed", "bordered"), full_width = F) %>%
+    add_footnote(c("period 1950 - 2011"), notation = "alphabet")
+```
+
+<div class="col2">
+```{r tables2}
+deathsTable
+```
+
+```{r tables3}
+injuriesTable
+```
+</div>
+
+11. Create graphs showing the events with most deaths and most injuries, 
+respectively
+```{r graphs1, fig.width=9.5, fig.height=4}
+TF$EventType <- factor(TF$EventType, levels = TF$EventType)
+g1 <- ggplot(TF, aes(EventType, Fatalities)) +
+        geom_bar(stat = "identity", fill = "red4", alpha = 0.9) + theme_bw() +
+        theme(axis.text.x = element_text(angle = 25, hjust = 1)) + xlab("Event Type") + 
+        ggtitle("Fig. 1: Deadliest Weather Events\n         (1950 - 2011 Total)")
+TI$EventType <- factor(TI$EventType, levels = TI$EventType)
+g2 <- ggplot(TI, aes(EventType, Injuries)) + 
+        geom_bar(stat = "identity", fill = "steelblue", alpha = 0.9) +theme_bw() +
+        theme(axis.text.x = element_text(angle = 25, hjust = 1)) + xlab("Event Type") + 
+        ggtitle("Fig. 2: Weather Events with Most Injuries\n         (1950 - 2011 Total)")
+grid.arrange(g1, g2, ncol = 2)
+```
+  
+12. Calculate the sum of total damage, property and crops costs by type of 
+event. Then select and rank the 10 costliest weather events
+```{r Damages}
+sumsD <- aggregate(x = list(TotalDamage = data$TotalDamage, 
+                            Property = data$Property, 
+                            Crops = data$Crops), 
+                   by = list(EventType = data$EventType), FUN = sum, 
+        na.rm = TRUE)
+TD    <- head(select(arrange(sumsD, desc(TotalDamage)), EventType, 
+                     TotalDamage, Property, Crops), 10)
+```
+
+13. Transform damage values to USD Millions for illustration. Prepare and print 
+table
+```{r Damages2}
+TDD <- TD
+TDD[,2:4] <- round(TDD[,2:4]/10^6, digits = 3)
+TDD[,2:4] <- format(TDD[,2:4], decimal.mark=".", big.mark=",", scientific=F, digits = 0)
+TDD <- cbind(TDD[,-2], TDD[,2])
+TDD <- cbind(Rank, TDD)
+kable(TDD, format = "html", caption = "Table 1: Costliest Weather Events (USD Millions)",
+                    align=c("c", "l", "r", "r", "r"), 
+                    col.names = c("Rank", "Type of Event", "Damage to Property", 
+                                  "Damage to Crops", "Total Damage")) %>%
+    kable_styling(bootstrap_options = c("striped","condensed", "bordered"), full_width = F) %>%
+    add_footnote(c("period 1950 - 2011"), notation = "alphabet")
+```
+
+14. Create graph showing costliest events
+```{r Damages4}
+TD$EventType <- factor(TD$EventType, levels = TD$EventType)
+TD2 <- melt(TD[,c(1,4,3)], id.vars = "EventType")
+ggplot(TD2, aes(x = EventType, y = value/10^9, fill = variable)) + 
+        geom_bar(stat = 'identity', alpha = 0.9) + theme_bw() +
+        theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+        xlab("Event Type") + ylab("Economic Damages (USD Bilions)") +
+        ggtitle("Fig. 3: Costliest Weather Events (USD Billions)") + 
+        scale_fill_manual(values=c("red4", "steelblue")) +
+        theme(legend.title = element_blank())
+```
+
+## Results   
+
+The main results are summarized in Tables 1, 2, and 3 and their corresponding 
+figures. The data analyzed shows tornadoes are the events that have caused the 
+most fatalities and injuries in the population in the years reported. The second 
+most hazardous to human life and health, as well as the most economically 
+devastating weather type of events are floods.   
+
+  
