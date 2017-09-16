@@ -34,9 +34,7 @@ script with the database downloaded from the link above.
 
 <center>
 
-<a href="https://reyvaz.github.io/NOAA-Database-Analysis/us_weather.html" rel="some text">![Foo](us_weather_files/figure-html/Damages4-1.png)]</a>
+<a href="https://reyvaz.github.io/NOAA-Database-Analysis/us_weather.html" rel="see html report">![image](us_weather_files/figure-html/Damages4-1.png)</a>
 
-
-<img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" style="width:70%;"/>
 </center>
 <br>
