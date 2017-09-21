@@ -32,9 +32,11 @@ script with the database downloaded from the link above.
 [GitHub Pages Link](https://reyvaz.github.io/NOAA-Database-Analysis/)  
 <br>
 
-<center>
-<a href="https://reyvaz.github.io/NOAA-Database-Analysis/us_weather.html" rel="see html report">
-<img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" 
-style="width: 600px;"/></a>
-</center>
-<br>  
+<p align="center">
+<a href="https://reyvaz.github.io/NOAA-Database-Analysis/us_weather.html" 
+rel="see html report">
+<img src="us_weather_files/figure-html/Damages4-1.png" alt="Drawing" width = "550"></a>
+</p>
+<br>
+<hr>
+<br>
