@@ -1,6 +1,6 @@
 ---
 title: "Most Hazardous Weather Events in the U.S."
-author: "Reynaldo"
+author: "Reynaldo Vazquez"
 date: "9/07/2017"
 output: html_document
 ---
